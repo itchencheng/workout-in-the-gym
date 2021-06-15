@@ -1,6 +1,8 @@
-
+import sys
 import gym
 import numpy as np
+from simple_plotter import Plotter
+
 
 class SingleValuePID():
     def __init__(self, expect_value, kp, ki, kd):
@@ -12,8 +14,7 @@ class SingleValuePID():
         self.integral_delta = 0
 
     def output(self, actual_value):
-        # delta = self.expect_value - actual_value
-        delta = actual_value - self.expect_value
+        delta = self.expect_value - actual_value
 
         p_comp = delta * self.kp
         self.integral_delta += delta
@@ -48,7 +49,7 @@ class SolverPID():
         
         pos_output = self.position_pid.output(position)
         angle_output = self.angle_pid.output(angle)
-        action = 1 if (angle_output - pos_output) < 0 else 0
+        action = 1 if (angle_output + pos_output) < 0 else 0
         
         print(action)
         return action
@@ -75,20 +76,37 @@ if __name__ == "__main__":
     done = False
     total_reward = 0
 
-    algo = SolverPID(0, 0,
-        2, 0, 50,
-        -8, 0, -100)
+    input_value = float(sys.argv[1])
+    print(input_value)
 
+    # (2, 0, 50)
+    kp_position = 0
+    ki_position = 0
+    kd_position = 0
+    
+    # (-8, 0, -100)
+    kp_angle = 5
+    ki_angle = 0
+    kd_angle = input_value
+
+    algo = SolverPID(0, 0,
+        kp_position, ki_position, kd_position,
+        kp_angle, ki_angle, kd_angle)
+
+    plotter = Plotter()
     while (not done):
         env.render()
 
         action = algo.choose(state)
+        plotter.add(state[2])
 
         new_state, reward, done, _ = env.step(action)
 
         state = new_state
         total_reward += reward
 
+
     env.close()
-    
+    plotter.plot()
+
     print(("total reward = ", total_reward))
