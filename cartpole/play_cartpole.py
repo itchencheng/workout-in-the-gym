@@ -1,5 +1,7 @@
 import sys
 import gym
+from gym.envs.classic_control.cartpole import CartPoleEnv
+
 import numpy as np
 from simple_plotter import Plotter
 
@@ -65,7 +67,8 @@ if __name__ == "__main__":
         reward_threshold=475.0,
     )
     '''
-    env = gym.make("CartPole-v1")
+    # env = gym.make("CartPole-v1")
+    env = CartPoleEnv()
 
     print(env.action_space)
     print(env.observation_space)
